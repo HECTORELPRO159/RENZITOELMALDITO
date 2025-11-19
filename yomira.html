@@ -1,0 +1,450 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Árbol de corazones y reloj romántico</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: "Segoe UI", system-ui, -apple-system, sans-serif;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: radial-gradient(circle at top, #ffd6e6, #f8b6c4 40%, #f0a1c0 80%);
+    }
+
+    .love-card {
+      width: 900px;
+      max-width: 95vw;
+      height: 520px;
+      background: rgba(255, 255, 255, 0.65);
+      backdrop-filter: blur(6px);
+      border-radius: 24px;
+      box-shadow: 0 18px 45px rgba(0, 0, 0, 0.18);
+      display: grid;
+      grid-template-columns: 1.1fr 1fr;
+      overflow: hidden;
+      position: relative;
+    }
+
+    .love-card::before {
+      /* pétalos de fondo suaves */
+      content: "";
+      position: absolute;
+      inset: 0;
+      background-image:
+        radial-gradient(circle, rgba(255, 192, 203, 0.45) 0 40%, transparent 42%),
+        radial-gradient(circle, rgba(255, 182, 193, 0.4) 0 42%, transparent 44%),
+        radial-gradient(circle, rgba(255, 160, 122, 0.3) 0 40%, transparent 42%);
+      background-size: 180px 180px, 220px 220px, 260px 260px;
+      background-position: 10% 20%, 80% 10%, 60% 80%;
+      opacity: 0.3;
+      pointer-events: none;
+    }
+
+    .column {
+      position: relative;
+      padding: 34px 40px;
+      z-index: 1;
+    }
+
+    .text-column {
+      border-right: 1px solid rgba(255, 255, 255, 0.7);
+    }
+
+    h1 {
+      font-size: 24px;
+      margin-bottom: 18px;
+      color: #aa3264;
+    }
+
+    .love-message {
+      font-size: 14px;
+      line-height: 1.6;
+      color: #4a3a3a;
+      margin-bottom: 26px;
+      max-width: 320px;
+      opacity: 0;
+      transform: translateY(12px);
+      transition: all 0.8s ease;
+    }
+
+    .love-message.show {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .signature {
+      margin-top: 8px;
+      font-size: 13px;
+      font-style: italic;
+      text-align: right;
+      color: #c04c7a;
+    }
+
+    .timer-title {
+      margin-top: 26px;
+      font-size: 14px;
+      color: #5a4b4b;
+    }
+
+    .timer {
+      margin-top: 12px;
+      font-size: 16px;
+      font-weight: 500;
+      color: #333;
+    }
+
+    .timer span.value {
+      font-size: 20px;
+      font-weight: 700;
+      margin: 0 3px;
+      color: #c52860;
+    }
+
+    .art-column {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      overflow: hidden;
+    }
+
+    /* Corazón grande inicial */
+    .big-heart {
+      width: 200px;
+      height: 180px;
+      position: relative;
+      cursor: pointer;
+      transform: scale(1);
+      transition: transform 0.4s ease, opacity 0.4s ease;
+    }
+
+    .big-heart::before,
+    .big-heart::after {
+      content: "";
+      position: absolute;
+      top: 0;
+      width: 100px;
+      height: 160px;
+      background: linear-gradient(145deg, #ff4b7b, #ff8fb3);
+      border-radius: 100px 100px 0 0;
+    }
+
+    .big-heart::before {
+      left: 0;
+      transform: rotate(-45deg);
+      transform-origin: 50px 80px;
+    }
+
+    .big-heart::after {
+      right: 0;
+      transform: rotate(45deg);
+      transform-origin: 50px 80px;
+    }
+
+    .big-heart:hover {
+      transform: scale(1.05);
+    }
+
+    .big-heart-text {
+      position: absolute;
+      width: 100%;
+      bottom: -38px;
+      text-align: center;
+      font-size: 13px;
+      color: #c52860;
+    }
+
+    .big-heart.fade-out {
+      opacity: 0;
+      transform: scale(0.7);
+      pointer-events: none;
+    }
+
+    /* Árbol de corazones */
+    .tree {
+      position: relative;
+      width: 260px;
+      height: 320px;
+      display: flex;
+      align-items: flex-end;
+      justify-content: center;
+      opacity: 0;
+      transform: translateY(12px);
+      transition: all 0.7s ease;
+    }
+
+    .tree.show {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .trunk {
+      width: 46px;
+      height: 120px;
+      background: linear-gradient(#1d8f7b, #116958);
+      border-radius: 0 0 18px 18px;
+      position: relative;
+      z-index: 1;
+    }
+
+    .crown {
+      position: absolute;
+      width: 230px;
+      height: 210px;
+      top: 0;
+      border-radius: 50% 50% 46% 46%;
+      transform: translateY(8px);
+      overflow: visible;
+    }
+
+    .small-heart {
+      position: absolute;
+      width: 18px;
+      height: 16px;
+      transform-origin: center;
+      animation: float 5s ease-in-out infinite alternate;
+    }
+
+    .small-heart::before,
+    .small-heart::after {
+      content: "";
+      position: absolute;
+      top: 0;
+      width: 9px;
+      height: 14px;
+      border-radius: 9px 9px 0 0;
+    }
+
+    .small-heart::before {
+      left: 0;
+    }
+
+    .small-heart::after {
+      right: 0;
+    }
+
+    /* Colores de corazones */
+    .c1::before, .c1::after { background: #ff4b7b; }
+    .c2::before, .c2::after { background: #ff9a76; }
+    .c3::before, .c3::after { background: #ffd166; }
+    .c4::before, .c4::after { background: #ff6fb5; }
+
+    /* forma corazón pequeña */
+    .small-heart {
+      transform: rotate(-45deg);
+    }
+
+    .small-heart::before {
+      transform-origin: right bottom;
+    }
+    .small-heart::after {
+      transform-origin: left bottom;
+    }
+
+    @keyframes float {
+      0%   { transform: translateY(0) rotate(-45deg); }
+      100% { transform: translateY(8px) rotate(-40deg); }
+    }
+
+    /* Corazones que caen */
+    .falling-heart {
+      position: absolute;
+      width: 16px;
+      height: 14px;
+      transform: rotate(-45deg);
+      opacity: 0;
+      animation: fall 8s linear infinite;
+    }
+
+    .falling-heart::before,
+    .falling-heart::after {
+      content: "";
+      position: absolute;
+      top: 0;
+      width: 8px;
+      height: 12px;
+      border-radius: 8px 8px 0 0;
+    }
+    .falling-heart::before { left: 0; }
+    .falling-heart::after  { right: 0; }
+
+    .f1::before, .f1::after { background: #ff4b7b; }
+    .f2::before, .f2::after { background: #ff9a76; }
+    .f3::before, .f3::after { background: #ffd166; }
+    .f4::before, .f4::after { background: #ff6fb5; }
+
+    @keyframes fall {
+      0% {
+        transform: translateY(-40px) rotate(-45deg);
+        opacity: 0;
+      }
+      10% {
+        opacity: 0.9;
+      }
+      100% {
+        transform: translateY(380px) translateX(40px) rotate(-30deg);
+        opacity: 0;
+      }
+    }
+
+    .hidden {
+      display: none;
+    }
+
+    @media (max-width: 720px) {
+      .love-card {
+        grid-template-columns: 1fr;
+        height: auto;
+      }
+      .text-column {
+        border-right: none;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.7);
+      }
+      .column {
+        padding: 22px 22px 26px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="love-card">
+    <div class="column text-column">
+      <h1>Para el amor de mi vida</h1>
+      <p id="loveMessage" class="love-message">
+        Si pudiera elegir un lugar seguro, sería a tu lado.<br>
+        Mientras más tiempo paso contigo, más te amo.<br>
+        Gracias por cada sonrisa, por cada abrazo<br>
+        y por quedarte incluso en mis días difíciles.
+        <span class="signature">— Te amo y siempre te amare ❤️</span>
+      </p>
+
+      <p class="timer-title">Nuestra historia de amor comenzó hace…</p>
+      <div class="timer">
+        <span class="value" id="days">0</span> días
+        <span class="value" id="hours">0</span> horas
+        <span class="value" id="minutes">0</span> minutos
+        <span class="value" id="seconds">0</span> segundos
+      </div>
+      <p style="margin-top:10px;font-size:11px;color:#867272;">
+        (Haz clic en el corazón de la derecha 💗)
+      </p>
+    </div>
+
+    <div class="column art-column">
+      <!-- Corazón inicial -->
+      <div id="bigHeart" class="big-heart">
+        <div class="big-heart-text">Haz clic para ver lo mas hermoso del mundo</div>
+      </div>
+
+      <!-- Árbol de corazones -->
+      <img id="tree" class="hidden" src="aroni.jpg"
+     style="width:260px; border-radius:15px; box-shadow:0 0 20px rgba(0,0,0,0.25);">
+    </div>
+  </div>
+
+  <script>
+    // FECHA DE INICIO DE LA RELACIÓN
+    // CAMBIA ESTO POR TU FECHA REAL
+    const startDate = new Date("2025-10-11T00:00:00"); // AAAA-MM-DD
+
+    function updateTimer() {
+      const now = new Date();
+      let diff = now - startDate;
+      if (diff < 0) diff = 0;
+
+      const seconds = Math.floor(diff / 1000);
+      const minutes = Math.floor(seconds / 60);
+      const hours   = Math.floor(minutes / 60);
+      const days    = Math.floor(hours / 24);
+
+      const remHours   = hours   % 24;
+      const remMinutes = minutes % 60;
+      const remSeconds = seconds % 60;
+
+      document.getElementById("days").textContent    = days;
+      document.getElementById("hours").textContent   = remHours;
+      document.getElementById("minutes").textContent = remMinutes;
+      document.getElementById("seconds").textContent = remSeconds;
+    }
+
+    setInterval(updateTimer, 1000);
+    updateTimer();
+
+    const bigHeart  = document.getElementById("bigHeart");
+    const tree      = document.getElementById("tree");
+    const crown     = document.getElementById("crown");
+    const loveMsg   = document.getElementById("loveMessage");
+
+    bigHeart.addEventListener("click", () => {
+      bigHeart.classList.add("fade-out");
+
+      // Después de la animación, mostramos el árbol
+      setTimeout(() => {
+        bigHeart.classList.add("hidden");
+        tree.classList.remove("hidden");
+
+        // Mostrar árbol y mensaje
+        requestAnimationFrame(() => {
+          tree.classList.add("show");
+          loveMsg.classList.add("show");
+        });
+
+        createTreeHearts();
+        createFallingHearts();
+      }, 450);
+    });
+
+    function createTreeHearts() {
+      const colors = ["c1", "c2", "c3", "c4"];
+      const totalHearts = 140;
+
+      for (let i = 0; i < totalHearts; i++) {
+        const h = document.createElement("div");
+        h.classList.add("small-heart");
+        h.classList.add(colors[Math.floor(Math.random() * colors.length)]);
+
+        // Distribuir en forma más o menos de corazón
+        const x = (Math.random() - 0.5) * 170; // ancho horizontal
+        const y = (Math.random() - 0.5) * 130; // altura
+        const scale = 0.7 + Math.random() * 0.8;
+
+        h.style.left = 50 + "%";
+        h.style.top = 40 + "%";
+        h.style.transform =
+          `translate(${x}px, ${y}px) scale(${scale}) rotate(-45deg)`;
+
+        // Pequeño desfase de animación
+        h.style.animationDelay = (Math.random() * 4) + "s";
+
+        crown.appendChild(h);
+      }
+    }
+
+    function createFallingHearts() {
+      const artColumn = document.querySelector(".art-column");
+      const colors = ["f1", "f2", "f3", "f4"];
+
+      for (let i = 0; i < 24; i++) {
+        const fh = document.createElement("div");
+        fh.classList.add("falling-heart");
+        fh.classList.add(colors[Math.floor(Math.random() * colors.length)]);
+
+        const startX = Math.random() * 260 + 40;
+        fh.style.left = startX + "px";
+        fh.style.animationDelay = (Math.random() * 8) + "s";
+        fh.style.animationDuration = (6 + Math.random() * 5) + "s";
+
+        artColumn.appendChild(fh);
+      }
+    }
+  </script>
+</body>
+</html>
